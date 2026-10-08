@@ -1,180 +1,427 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+export default function ExploreScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
+  const onRefresh = () => {
+    setRefreshing(true);
+
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1200);
   };
-  const theme = useTheme();
-
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
 
   return (
     <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#2563EB"
+          colors={["#2563EB"]}
+        />
+      }
+    >
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.smallTitle}>DISCOVER</Text>
+          <Text style={styles.title}>Explore</Text>
+        </View>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+        <TouchableOpacity style={styles.filterButton}>
+          <Ionicons name="options-outline" size={22} color="#111827" />
+        </TouchableOpacity>
+      </View>
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+      <View style={styles.searchBox}>
+        <Ionicons name="search-outline" size={20} color="#9CA3AF" />
 
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search anything..."
+          placeholderTextColor="#9CA3AF"
+          style={styles.searchInput}
+        />
+      </View>
 
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categories}
+      >
+        {["All", "Coding", "Learning", "Ideas"].map((category) => (
+          <TouchableOpacity
+            key={category}
+            style={[
+              styles.categoryButton,
+              activeCategory === category && styles.categoryButtonActive,
+            ]}
+            onPress={() => setActiveCategory(category)}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                activeCategory === category && styles.categoryTextActive,
+              ]}
+            >
+              {category}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
+      <Text style={styles.sectionTitle}>Featured</Text>
 
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
+      <TouchableOpacity style={styles.featuredCard}>
+        <View style={styles.featuredIcon}>
+          <Ionicons name="phone-portrait-outline" size={30} color="#FFFFFF" />
+        </View>
+
+        <View style={styles.featuredContent}>
+          <Text style={styles.featuredLabel}>FEATURED COURSE</Text>
+
+          <Text style={styles.featuredTitle}>Mobile App Development</Text>
+
+          <Text style={styles.featuredDescription}>
+            Learn how to build beautiful mobile applications with React Native.
+          </Text>
+
+          <View style={styles.featuredBottom}>
+            <View style={styles.rating}>
+              <Ionicons name="star" size={15} color="#F59E0B" />
+
+              <Text style={styles.ratingText}>4.9</Text>
+            </View>
+
+            <Text style={styles.students}>1.2k students</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      <Text style={styles.sectionTitle}>Recommended</Text>
+
+      <TouchableOpacity style={styles.courseCard}>
+        <View style={styles.courseIconBlue}>
+          <Ionicons name="logo-react" size={25} color="#2563EB" />
+        </View>
+
+        <View style={styles.courseContent}>
+          <Text style={styles.courseTitle}>React Native</Text>
+          <Text style={styles.courseSubtitle}>
+            Build cross-platform mobile apps
+          </Text>
+
+          <View style={styles.courseMeta}>
+            <Ionicons name="time-outline" size={14} color="#9CA3AF" />
+            <Text style={styles.metaText}>8 hours</Text>
+
+            <Ionicons name="star-outline" size={14} color="#9CA3AF" />
+            <Text style={styles.metaText}>4.8</Text>
+          </View>
+        </View>
+
+        <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.courseCard}>
+        <View style={styles.courseIconYellow}>
+          <Ionicons name="logo-javascript" size={25} color="#CA8A04" />
+        </View>
+
+        <View style={styles.courseContent}>
+          <Text style={styles.courseTitle}>JavaScript</Text>
+          <Text style={styles.courseSubtitle}>Master modern JavaScript</Text>
+
+          <View style={styles.courseMeta}>
+            <Ionicons name="time-outline" size={14} color="#9CA3AF" />
+            <Text style={styles.metaText}>10 hours</Text>
+
+            <Ionicons name="star-outline" size={14} color="#9CA3AF" />
+            <Text style={styles.metaText}>4.9</Text>
+          </View>
+        </View>
+
+        <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.courseCard}>
+        <View style={styles.courseIconGreen}>
+          <Ionicons name="server-outline" size={25} color="#16A34A" />
+        </View>
+
+        <View style={styles.courseContent}>
+          <Text style={styles.courseTitle}>Backend Development</Text>
+          <Text style={styles.courseSubtitle}>
+            Learn APIs and server-side development
+          </Text>
+
+          <View style={styles.courseMeta}>
+            <Ionicons name="time-outline" size={14} color="#9CA3AF" />
+            <Text style={styles.metaText}>12 hours</Text>
+
+            <Ionicons name="star-outline" size={14} color="#9CA3AF" />
+            <Text style={styles.metaText}>4.7</Text>
+          </View>
+        </View>
+
+        <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+      </TouchableOpacity>
+
+      <View style={styles.bottomSpace} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F7FB",
+  },
+
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 55,
+    paddingBottom: 30,
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 22,
+  },
+
+  smallTitle: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#2563EB",
+    letterSpacing: 1.5,
+    marginBottom: 4,
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#111827",
+  },
+
+  filterButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 15,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+
+  searchBox: {
+    height: 52,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    marginBottom: 17,
+    elevation: 1,
+  },
+
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 13,
+    color: "#111827",
+  },
+
+  categories: {
+    paddingBottom: 25,
+    gap: 9,
+  },
+
+  categoryButton: {
+    height: 38,
+    paddingHorizontal: 17,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  categoryButtonActive: {
+    backgroundColor: "#2563EB",
+  },
+
+  categoryText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+
+  categoryTextActive: {
+    color: "#FFFFFF",
+  },
+
+  sectionTitle: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 12,
+  },
+
+  featuredCard: {
+    backgroundColor: "#2563EB",
+    borderRadius: 22,
+    padding: 18,
+    flexDirection: "row",
+    marginBottom: 28,
+    elevation: 3,
+  },
+
+  featuredIcon: {
+    width: 55,
+    height: 55,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 13,
+  },
+
+  featuredContent: {
     flex: 1,
   },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+
+  featuredLabel: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#BFDBFE",
+    letterSpacing: 1,
+    marginBottom: 5,
   },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
+
+  featuredTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    marginBottom: 5,
   },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+
+  featuredDescription: {
+    fontSize: 11,
+    lineHeight: 17,
+    color: "#DBEAFE",
+    marginBottom: 10,
   },
-  centerText: {
-    textAlign: 'center',
+
+  featuredBottom: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  pressed: {
-    opacity: 0.7,
+
+  rating: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 14,
   },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
+
+  ratingText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginLeft: 4,
   },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+
+  students: {
+    fontSize: 10,
+    color: "#BFDBFE",
   },
-  collapsibleContent: {
-    alignItems: 'center',
+
+  courseCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    elevation: 1,
   },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
+
+  courseIconBlue: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: "#EFF6FF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 13,
   },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+
+  courseIconYellow: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: "#FEFCE8",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 13,
+  },
+
+  courseIconGreen: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: "#F0FDF4",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 13,
+  },
+
+  courseContent: {
+    flex: 1,
+  },
+
+  courseTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 4,
+  },
+
+  courseSubtitle: {
+    fontSize: 11,
+    color: "#6B7280",
+    marginBottom: 7,
+  },
+
+  courseMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  metaText: {
+    fontSize: 10,
+    color: "#9CA3AF",
+    marginLeft: 4,
+    marginRight: 12,
+  },
+
+  bottomSpace: {
+    height: 20,
   },
 });
